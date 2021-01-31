@@ -1,0 +1,13 @@
+using Ject.Dependencies.Extensions;
+using Ject.Usage;
+
+namespace MyNamespace
+{
+    public class #SCRIPTNAME#: ContractWriter
+    {
+        protected override void Write()
+        {
+            Contract.Describe("My cool variable!");
+        }
+    }
+}

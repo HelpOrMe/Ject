@@ -1,0 +1,12 @@
+{
+  "name": "ject",
+  "version": "0.9.0",
+  "displayName": "Ject",
+  "keywords": [],
+  "author": {
+    "name": "HelpOrMe",
+    "url": "https://github.com/HelpOrMe/Ject"
+  },
+  "type": "library",
+  "hideInEditor": true
+}
