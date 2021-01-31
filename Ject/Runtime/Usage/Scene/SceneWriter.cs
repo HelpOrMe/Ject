@@ -14,7 +14,7 @@ namespace Ject.Usage.Scene
     public partial class SceneWriter : MonoBehaviour
     {
         public WriteEntrypoint entrypoint = WriteEntrypoint.None;
-        public string writeMethodName;
+        public string writeMethodName = "Write";
 
         public SceneContext sceneContext;
         
