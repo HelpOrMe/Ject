@@ -15,31 +15,48 @@ namespace JectEditor.Inspectors
         {
             Type type = typeof(SceneWriter);
             _methods ??= type.GetMethods().Select(m => m.Name).Where(n => n.StartsWith("Write")).ToArray();
-            
-            if (SceneWriter.sceneContext == null)
+
+            if (SceneWriter.contextAccess == null)
             {
-                if (SceneWriter.TryGetComponent(out SceneWriter.sceneContext))
+                if (SceneWriter.TryGetComponent(out SceneWriter.contextAccess))
                     return;
 
                 SceneWriter.entrypoint = SceneWriter.WriteEntrypoint.None;
-                
+
                 const string message = "Access only from scripts. \nAdd SceneContext component to use it.";
                 EditorGUILayout.HelpBox(message, MessageType.Info);
-                return;
             }
+            
+            DrawInspector();
+        }
 
+        public void DrawInspector()
+        {
             SceneWriter.entrypoint = (SceneWriter.WriteEntrypoint)
                 EditorGUILayout.EnumPopup("Entrypoint", SceneWriter.entrypoint);
 
-            if (SceneWriter.entrypoint != SceneWriter.WriteEntrypoint.None)
+            if (SceneWriter.entrypoint == SceneWriter.WriteEntrypoint.None)
+                return;
+         
+            string[] options = new string[_methods.Length];
+            
+            for (int i = 0; i < _methods.Length; i++)
             {
-                int index = Array.IndexOf(_methods, SceneWriter.writeMethodName);
-                index = EditorGUILayout.Popup("Write Method", index, _methods);
-                
-                if (index >= 0 && index < _methods.Length)
+                options[i] = _methods[i];
+                if (options[i] != nameof(SceneWriter.Write))
                 {
-                    SceneWriter.writeMethodName = _methods[index];
+                    options[i] += " (Partial)";
                 }
+            }
+            
+            int index = Array.IndexOf(_methods, SceneWriter.writeMethodName);
+            index = EditorGUILayout.Popup("Write Method", index, options);
+                
+            if (index >= 0 && index < _methods.Length)
+            {
+                string methodName = _methods[index];
+                SceneWriter.usePartialMethod = methodName != nameof(SceneWriter.Write);
+                SceneWriter.writeMethodName = methodName;
             }
         }
     }

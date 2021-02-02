@@ -22,7 +22,8 @@ namespace JectEditor.Inspectors
         private ContextDrawer _sceneContextDrawer;
         
         private bool _contactWritersFoldout = true;
-        private bool _globalContextFoldout = true;
+        private bool _sceneContextFoldout = true;
+        
         private readonly Dictionary<Object, bool> _objContextFoldouts = new Dictionary<Object, bool>();
         private readonly Dictionary<Object, ContextDrawer> _objContextDrawers = new Dictionary<Object, ContextDrawer>();
 
@@ -73,9 +74,6 @@ namespace JectEditor.Inspectors
         
         public override void OnInspectorGUI()
         {
-            _sceneContextDrawer ??= new WritableContextDrawer(SceneContext.sceneContext, ContractWriters.RawData, 
-                "SceneContext");
-
             if (ContractWriters.RawData.contractWriterTypeNames.Count == 0)
             {
                 EditorGUILayout.HelpBox("There are no contract writers." +
@@ -90,14 +88,37 @@ namespace JectEditor.Inspectors
         private void Draw()
         {
             DrawContractWriters();
-            EditorGUILayout.Separator();
 
-            _globalContextFoldout = EditorGUILayout.Foldout(_globalContextFoldout, "Scene context");
-            if (_globalContextFoldout)
-                _sceneContextDrawer.Draw(); 
+            if (SceneContext.extraContexts.ContainsKey("Scene"))
+            {
+                EditorGUILayout.Separator();
+                DrawSceneContext();
+            }
             
-            EditorGUILayout.Separator();
             DrawContexts();
+        }
+
+        private void DrawSceneContext()
+        {
+            _sceneContextDrawer ??= new WritableContextDrawer(SceneContext.extraContexts["Scene"],
+                ContractWriters.RawData, "SceneContext");
+            
+            EditorGUILayout.BeginHorizontal();
+            
+            _sceneContextFoldout = EditorGUILayout.Foldout(_sceneContextFoldout, "Scene context");
+            if (ButtonDrawers.Minus())
+            {
+                SceneContext.extraContexts.Remove("Scene");
+                _sceneContextDrawer = null;
+                return;
+            }
+            
+            EditorGUILayout.EndHorizontal();
+            
+            if (_sceneContextFoldout)
+            {
+                _sceneContextDrawer.Draw(); 
+            }
         }
         
         private void DrawContractWriters()
@@ -136,16 +157,21 @@ namespace JectEditor.Inspectors
 
         private void DrawContexts()
         {
-            DrawObjectContexts();
-            EditorGUILayout.Separator();
-            DrawComponentsUnderContext();
+            if (SceneContext.objectContexts.Count > 0)
+            {
+                EditorGUILayout.Separator();
+                DrawObjectContexts();
+            }
+
+            if (SceneContext.componentsUnderContext.Count > 0)
+            {
+                EditorGUILayout.Separator();
+                DrawComponentsUnderContext();
+            }
         }
 
         private void DrawObjectContexts()
         {
-            if (SceneContext.objectContexts.Count == 0)
-                return;
-            
             EditorGUILayout.LabelField("Object contexts", EditorStyles.boldLabel);
             
             foreach (Object obj in SceneContext.objectContexts.Keys.ToArray())
@@ -175,6 +201,7 @@ namespace JectEditor.Inspectors
             
             EditorGUILayout.BeginHorizontal();
             _objContextFoldouts[obj] = EditorGUILayout.Foldout(_objContextFoldouts[obj], obj.ToString(), true);
+            
             if (ButtonDrawers.Minus())
             {
                 SceneContext.objectContexts.Remove(obj);
@@ -184,9 +211,6 @@ namespace JectEditor.Inspectors
 
         private void DrawComponentsUnderContext()
         {
-            if (SceneContext.componentsUnderContext.Count == 0)
-                return;
-            
             EditorGUILayout.LabelField("Components under context", EditorStyles.boldLabel);
 
             foreach (Component component in SceneContext.componentsUnderContext.ToArray())
