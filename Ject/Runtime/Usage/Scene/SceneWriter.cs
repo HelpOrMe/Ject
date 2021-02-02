@@ -13,18 +13,23 @@ namespace Ject.Usage.Scene
 {
     public partial class SceneWriter : MonoBehaviour
     {
-        public WriteEntrypoint entrypoint = WriteEntrypoint.None;
-        public string writeMethodName = "Write";
-
-        public SceneContext sceneContext;
-        
         public event Action BeforeWrite;
         public event Action AfterWrite;
         public event Action<Component> BeforeComponentWrite;
         public event Action<Component> AfterComponentWrite;
+        
+        public WriteEntrypoint entrypoint = WriteEntrypoint.None;
+        
+        public bool usePartialMethod;
+        public string writeMethodName = "Write";
 
-        protected Dictionary<Identifier, ISignedContract> contracts = new Dictionary<Identifier, ISignedContract>();
-        protected Dictionary<Context, ISignedContract> contextContracts = new Dictionary<Context, ISignedContract>();
+        public MonoContextAccess contextAccess;
+
+        protected readonly Dictionary<Identifier, ISignedContract> contracts = 
+            new Dictionary<Identifier, ISignedContract>();
+        
+        protected readonly Dictionary<Context, ISignedContract> contextContracts = 
+            new Dictionary<Context, ISignedContract>();
         
         [MenuItem("Assets/Create/Ject/C# Contract Writer", false, 82)]
         private static void NewContractWriter()
@@ -50,13 +55,25 @@ namespace Ject.Usage.Scene
             }
         }
 
-        protected void InvokeWriteMethod()
+        private void InvokeWriteMethod()
+        {
+            if (usePartialMethod)
+            {
+                InvokePartialMethod();
+            }
+            else
+            {
+                Write(contextAccess.GetComponentContexts());
+            }
+        }
+
+        private void InvokePartialMethod()
         {
             MethodInfo method = GetType().GetMethod(writeMethodName);
             if (method == null)
-                throw new MissingMemberException("Invalid write method name " + writeMethodName);
+                throw new MissingMemberException("Invalid partial write method name " + writeMethodName);
 
-            method.Invoke(this, new object[] { sceneContext.GetComponentContexts() });
+            method.Invoke(this, new object[] { contextAccess.GetComponentContexts() });
         }
         
         public void Write(Dictionary<Component, List<Context>> componentContexts)

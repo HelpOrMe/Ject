@@ -6,12 +6,19 @@ using Object = UnityEngine.Object;
 
 namespace Ject.Usage.Scene
 {
-    public class SceneContext : MonoBehaviour
+    public class SceneContext : MonoContextAccess
     {
-        public Context sceneContext;
+        [SerializeField]
+        public SerializableDictionary<string, Context> extraContexts = 
+            new SerializableDictionary<string, Context>
+            {
+                ["Scene"] = new Context()
+            };
         
         [SerializeField] 
-        public SerializableDictionary<Object, Context> objectContexts = new SerializableDictionary<Object, Context>();
+        public SerializableDictionary<Object, Context> objectContexts =
+            new SerializableDictionary<Object, Context>();
+        
         [SerializeField] 
         public List<Component> componentsUnderContext = new List<Component>();
 
@@ -53,7 +60,7 @@ namespace Ject.Usage.Scene
             }
         }
 
-        public Dictionary<Component, List<Context>> GetComponentContexts()
+        public override Dictionary<Component, List<Context>> GetComponentContexts()
         {
             var componentsContexts = new Dictionary<Component, List<Context>>();
             foreach (Component component in componentsUnderContext)
@@ -80,8 +87,8 @@ namespace Ject.Usage.Scene
                     contexts.Add(objectContexts[iparent.gameObject]);
                 }
             }
-            
-            contexts.Add(sceneContext);
+
+            contexts.AddRange(extraContexts.Values);
             
             return contexts;
         }

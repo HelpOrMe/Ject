@@ -19,14 +19,14 @@ namespace Ject.Usage.Scene
             
             foreach (Component component in componentContexts.Keys)
             {
-                BeforeComponentWrite?.Invoke(component);
                 WriteComponent(component, componentContexts[component]);
-                AfterComponentWrite?.Invoke(component);
-                
                 await Task.Yield();
             }
             
             AfterWrite?.Invoke();
+            
+            contracts.Clear();
+            contextContracts.Clear();
         }
     }
 }

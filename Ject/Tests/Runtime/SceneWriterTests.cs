@@ -94,7 +94,7 @@ namespace Ject.RuntimeTests
         }
 
         [Test(ExpectedResult = null)]
-        public IEnumerator Async()
+        public IEnumerator PartialAsync()
         {
             Task task = _sceneWriter.WriteAsync(_componentContexts);
             
