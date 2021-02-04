@@ -8,5 +8,8 @@
     "url": "https://github.com/HelpOrMe/Ject"
   },
   "type": "library",
-  "hideInEditor": true
+  "hideInEditor": true,
+  "dependencies": {
+    "toolkit": "0.1.0"
+  }
 }
