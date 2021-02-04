@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Ject.Contracts;
-using Ject.Toolkit;
+using Toolkit;
 
 namespace Ject.Usage
 {

@@ -1,5 +1,5 @@
 ﻿using Ject.Contracts;
-using Ject.Toolkit;
+using Toolkit;
 
 namespace Ject.Dependencies.Extensions
 {

@@ -1,6 +1,6 @@
 ﻿using System;
 using Ject.Injection;
-using Ject.Toolkit;
+using Toolkit;
 
 namespace Ject.Usage.Scene
 {

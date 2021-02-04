@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Ject.Toolkit;
+using Toolkit;
 using UnityEngine;
 
 namespace Ject.Usage.Scene

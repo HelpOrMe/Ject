@@ -5,7 +5,7 @@ using System.Reflection;
 using Ject.Contracts;
 using Ject.Injection;
 using Ject.Preferences;
-using Ject.Toolkit;
+using Toolkit;
 using UnityEditor;
 using UnityEngine;
 

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Reflection;
 using Ject.Contracts;
-using Ject.Toolkit;
+using Toolkit;
 
 namespace Ject.Injection
 {

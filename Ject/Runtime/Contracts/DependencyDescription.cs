@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Ject.Toolkit;
+using Toolkit;
 
 namespace Ject.Contracts
 {

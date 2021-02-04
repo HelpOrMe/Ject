@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace Ject.Toolkit
+namespace Toolkit
 {
     [Serializable]
     public struct Identifier

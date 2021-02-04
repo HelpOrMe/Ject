@@ -1,5 +1,6 @@
 ﻿using System;
-using Ject.Toolkit;
+using Toolkit;
+using Toolkit.Collections;
 
 namespace Ject.Usage
 {

@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Ject.Injection;
 using Ject.Preferences;
-using Ject.Toolkit;
+using Toolkit;
 using Ject.Usage;
 using Ject.Usage.Scene;
-using JectEditor.Toolkit;
-using JectEditor.Toolkit.Extensions;
+using Toolkit.Editor;
+using Toolkit.Editor.Extensions;
 using UnityEditor;
 using UnityEngine;
 

@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace Ject.Toolkit
+namespace Toolkit.Collections
 {
     [Serializable]
     public class SerializableObject : ISerializationCallbackReceiver

@@ -4,7 +4,7 @@ using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
 using Ject.Dependencies.Extensions;
 using Ject.Injection;
-using Ject.Toolkit;
+using Toolkit;
 using Ject.Usage;
 using Ject.Usage.Scene;
 using NUnit.Framework;

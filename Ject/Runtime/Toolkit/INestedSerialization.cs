@@ -1,4 +1,4 @@
-﻿namespace Ject.Toolkit
+﻿namespace Toolkit.Collections
 {
     public interface INestedSerialization
     {
