@@ -1,7 +1,9 @@
 {
     "name": "Ject",
     "rootNamespace": "Ject",
-    "references": [],
+    "references": [
+        "GUID:5096fdd78a1bc5745be2a1d67240dad3"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

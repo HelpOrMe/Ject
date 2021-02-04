@@ -8,6 +8,7 @@ using Toolkit;
 using Ject.Usage;
 using Ject.Usage.Scene;
 using NUnit.Framework;
+using Toolkit.Collections;
 using UnityEngine;
 
 namespace Ject.RuntimeTests
