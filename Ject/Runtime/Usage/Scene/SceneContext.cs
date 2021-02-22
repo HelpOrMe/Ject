@@ -22,6 +22,8 @@ namespace Ject.Usage.Scene
         [SerializeField] 
         public List<Component> componentsUnderContext = new List<Component>();
 
+        #if UNITY_EDITOR
+        
         [MenuItem("GameObject/Add Context", true)]
         private static bool AddObjectContextValidate(MenuCommand command)
         {
@@ -59,6 +61,8 @@ namespace Ject.Usage.Scene
                 sceneContext.componentsUnderContext.Add(component);
             }
         }
+        
+        #endif
 
         public override Dictionary<Component, List<Context>> GetComponentContexts()
         {
