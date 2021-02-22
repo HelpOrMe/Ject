@@ -1,8 +1,6 @@
 ﻿using Ject.Contracts;
 using Ject.Contracts.Extensions;
-using Ject.Dependencies;
 using Ject.Dependencies.Extensions;
-using Ject.Dependencies.Generic;
 using Ject.Dependencies.Generic.Extensions;
 using NUnit.Framework;
 
