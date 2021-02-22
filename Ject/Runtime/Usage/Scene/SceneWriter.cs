@@ -30,7 +30,14 @@ namespace Ject.Usage.Scene
         protected readonly Dictionary<Context, ISignedContract> contextContracts = 
             new Dictionary<Context, ISignedContract>();
         
-        #if UNITY_EDITOR
+        public enum WriteEntrypoint
+        {
+            None,
+            Awake,
+            Start
+        }
+        
+#if UNITY_EDITOR
         
         [MenuItem("Assets/Create/Ject/C# Contract Writer", false, 82)]
         private static void NewContractWriter()
@@ -40,7 +47,7 @@ namespace Ject.Usage.Scene
                 "ContractWriter.cs");
         }
         
-        #endif        
+#endif        
 
         private void Awake()
         {
@@ -126,13 +133,6 @@ namespace Ject.Usage.Scene
             }
 
             return contextContracts[context] = groupedContract;
-        }
-        
-        public enum WriteEntrypoint
-        {
-            None,
-            Awake,
-            Start
         }
     }
 }

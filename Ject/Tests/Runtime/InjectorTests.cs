@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Ject.Contracts;
-using Ject.Dependencies;
 using Ject.Dependencies.Extensions;
 using Ject.Injection;
 using Toolkit;
