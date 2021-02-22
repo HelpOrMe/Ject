@@ -2,35 +2,46 @@
 using System.Collections.Generic;
 using System.IO;
 using Ject.Contracts;
-using Ject.Preferences;
 using Ject.Toolkit;
 using UnityEditor;
 using UnityEngine;
 
 namespace Ject.Usage
 {
+    #if UNITY_EDITOR
     [InitializeOnLoad]
+    #endif
     public static class ContractWriters
     {
-        public static ContractWritersRawData RawData => DataAsset.rawData;
-        public static ContractWritersSettings Settings => DataAsset.settings;
+        public static ContractWritersRawData RawData => Data.rawData;
+        public static ContractWritersSettings Settings => Data.settings;
         
         public static readonly Dictionary<Identifier, ISignedContract> CachedContracts;
-        private static readonly ContractWritersDataAsset DataAsset;
+        private static readonly ContractWritersData Data;
         
         public static IEnumerable<Identifier> ContractIds => RawData.contractWriterTypeNames.Keys;
 
         static ContractWriters()
         {
-            DataAsset = LoadWritersData(PreferencesManager.Preferences.resourcesPath + "/ContractWritersData.asset");
+            Data = LoadWritersData();
             CachedContracts = new Dictionary<Identifier, ISignedContract>();
         }
 
-        private static ContractWritersDataAsset LoadWritersData(string path)
+        private static ContractWritersData LoadWritersData()
         {
-            var data = AssetDatabase.LoadAssetAtPath<ContractWritersDataAsset>(path);
-            if (data == null) 
-                throw new FileLoadException("Invalid contract writers data path " + path);
+            var data = Resources.Load<ContractWritersData>("Ject/ContractWritersData.asset");
+            
+            if (data == null)
+            {
+                #if UNITY_EDITOR
+                Directory.CreateDirectory("Assets/Resources/Ject");
+                data = ScriptableObject.CreateInstance<ContractWritersData>();
+                AssetDatabase.CreateAsset(data, "Assets/Resources/Ject/ContractWritersData.asset");
+                #else
+                throw new FileLoadException("Contract writers data doesn't exist");
+                #endif
+            }
+            
             return data;
         }
 

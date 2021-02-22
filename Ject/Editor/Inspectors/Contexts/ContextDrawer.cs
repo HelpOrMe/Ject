@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Ject.Injection;
-using Ject.Preferences;
 using Ject.Toolkit;
 using Ject.Usage;
 using Ject.Usage.Scene;
 using JectEditor.Toolkit;
 using JectEditor.Toolkit.Extensions;
+using JectEditor.Preferences;
 using UnityEditor;
 using UnityEngine;
 

@@ -1,7 +1,7 @@
 ﻿using UnityEditor;
 using UnityEngine;
 
-namespace Ject.Preferences
+namespace JectEditor.Preferences
 {
     public static class PreferencesManager
     {

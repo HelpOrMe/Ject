@@ -3,7 +3,7 @@ using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace Ject.Preferences
+namespace JectEditor.Preferences
 {
     public class PreferencesProvider : SettingsProvider
     {

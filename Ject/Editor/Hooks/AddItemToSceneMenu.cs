@@ -1,5 +1,4 @@
-﻿using Ject.Toolkit;
-using Ject.Usage.Scene;
+﻿using Ject.Usage.Scene;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
