@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reflection;
 using Ject.Contracts;
 using Ject.Injection;
-using Ject.Preferences;
 using Toolkit;
 using UnityEditor;
 using UnityEngine;
@@ -31,13 +30,17 @@ namespace Ject.Usage.Scene
         protected readonly Dictionary<Context, ISignedContract> contextContracts = 
             new Dictionary<Context, ISignedContract>();
         
+        #if UNITY_EDITOR
+        
         [MenuItem("Assets/Create/Ject/C# Contract Writer", false, 82)]
         private static void NewContractWriter()
         {
             ProjectWindowUtil.CreateScriptAssetFromTemplateFile(
-                PreferencesManager.Preferences.resourcesPath + "ScriptTemplates/C# Contract writer Template.cs.txt",
+                "Packages/ject/Resources/ScriptTemplates/C# Contract writer Template.cs.txt",
                 "ContractWriter.cs");
         }
+        
+        #endif        
 
         private void Awake()
         {

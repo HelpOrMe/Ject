@@ -2,13 +2,11 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace Ject.Preferences
+namespace JectEditor.Preferences
 {
     [Serializable]
     public class PreferencesAsset : ScriptableObject
     {
-        public string resourcesPath = "Packages/ject/Resources/";
-
         [Space] public bool simpleTypes;
         
         [Space]

@@ -2,7 +2,7 @@
 
 namespace Ject.Usage
 {
-    public class ContractWritersDataAsset : ScriptableObject
+    public class ContractWritersData : ScriptableObject
     {
         public ContractWritersRawData rawData;
         public ContractWritersSettings settings;
