@@ -29,17 +29,17 @@ namespace Ject.Usage
 
         private static ContractWritersData LoadWritersData()
         {
-            var data = Resources.Load<ContractWritersData>("Ject/ContractWritersData.asset");
+            var data = Resources.Load<ContractWritersData>("Ject/ContractWritersData");
             
             if (data == null)
             {
-                #if UNITY_EDITOR
+#if UNITY_EDITOR
                 Directory.CreateDirectory("Assets/Resources/Ject");
                 data = ScriptableObject.CreateInstance<ContractWritersData>();
                 AssetDatabase.CreateAsset(data, "Assets/Resources/Ject/ContractWritersData.asset");
-                #else
+#else
                 throw new FileLoadException("Contract writers data doesn't exist");
-                #endif
+#endif
             }
             
             return data;

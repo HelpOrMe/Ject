@@ -66,7 +66,6 @@ namespace JectEditor.Inspectors
                 ContractWriters.RawData.contractWriterTypeNames[id] = type.AssemblyQualifiedName;
                 if (!ContractWriters.RawData.contractWriterNames.ContainsKey(id))
                 {
-                    Debug.Log("Write " + type.Name);
                     ContractWriters.RawData.contractWriterNames[id] = type.Name;
                 }
             }

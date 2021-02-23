@@ -60,7 +60,7 @@ namespace Ject.RuntimeTests
                 injectionInfo = new InjectionInfo
                 {
                     fieldNames = new [] {nameof(TestMusicComponent.anotherGoodSong)},
-                    fieldDependencyIds = new SerializableSupportedDictionary<string, Identifier>
+                    fieldDependencyIds = new SerializableDictionary<string, Identifier>
                     {
                         [nameof(TestMusicComponent.anotherGoodSong)] = AnotherGoodSongId
                     }

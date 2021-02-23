@@ -7,7 +7,7 @@ namespace Ject.Contracts
     public class DependencyDescription
     {
         public bool IncludeIdOnlyResolve = false;
-        public Identifier Id = Identifier.None;
+        public Identifier Id = default;
         public readonly List<Type> ImplementTypes = new List<Type>();
     }
 }
