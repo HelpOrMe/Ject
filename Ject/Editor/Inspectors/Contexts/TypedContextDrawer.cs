@@ -6,7 +6,8 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Ject.Usage;
 using Ject.Usage.Scene;
-using Toolkit.Editor.Extensions;
+using JectEditor.Preferences;
+using ToolkitEditor.Extensions;
 using UnityEngine;
 
 namespace JectEditor.Inspectors.Contexts
@@ -180,16 +181,20 @@ namespace JectEditor.Inspectors.Contexts
             DrawLabel(method.Name, TextStyle);
             DrawLabel("(", TextStyle, -1);
 
-            ParameterInfo[] parameters = method.GetParameters();
-            foreach (ParameterInfo parameter in parameters)
+            if (PreferencesManager.Preferences.methodParameters)
             {
-                DrawType(parameter.ParameterType, -1);
-                DrawLabel(parameter.Name, TextStyle);
-                if (parameters[parameters.GetUpperBound(0)] != parameter)
+                ParameterInfo[] parameters = method.GetParameters();
+                foreach (ParameterInfo parameter in parameters)
                 {
-                    DrawLabel(", ", TextStyle, -1);
+                    DrawType(parameter.ParameterType, -1);
+                    DrawLabel(parameter.Name, TextStyle);
+                    if (parameters[parameters.GetUpperBound(0)] != parameter)
+                    {
+                        DrawLabel(", ", TextStyle, -1);
+                    }
                 }
             }
+            
             
             DrawLabel(") { }", TextStyle, -1);
             

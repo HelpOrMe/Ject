@@ -112,7 +112,7 @@ namespace JectEditor.Inspectors.Contexts
             string name = InjectionInfo.methodNames[index];
             InjectionInfo.methodNames[index] = DrawText(name, TextStyle);
             
-            DrawLabel("(...) {   }", TextStyle, -1);
+            DrawLabel("() {   }", TextStyle, -1);
             
             if (Rect.Contains(Event.current.mousePosition) 
                 || InjectionInfo.methodDependencyIds.ContainsKey(name))

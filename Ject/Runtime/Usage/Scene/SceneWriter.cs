@@ -38,7 +38,6 @@ namespace Ject.Usage.Scene
         }
         
 #if UNITY_EDITOR
-        
         [MenuItem("Assets/Create/Ject/C# Contract Writer", false, 82)]
         private static void NewContractWriter()
         {
@@ -46,7 +45,6 @@ namespace Ject.Usage.Scene
                 "Packages/ject/Resources/ScriptTemplates/C# Contract writer Template.cs.txt",
                 "ContractWriter.cs");
         }
-        
 #endif        
 
         private void Awake()

@@ -7,9 +7,9 @@ using Toolkit;
 using Ject.Usage;
 using Ject.Usage.Scene;
 using Toolkit.Collections;
-using Toolkit.Editor;
-using Toolkit.Editor.Extensions;
 using JectEditor.Preferences;
+using ToolkitEditor;
+using ToolkitEditor.Extensions;
 using UnityEditor;
 using UnityEngine;
 

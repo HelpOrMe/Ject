@@ -7,7 +7,9 @@ namespace JectEditor.Preferences
     [Serializable]
     public class PreferencesAsset : ScriptableObject
     {
-        [Space] public bool simpleTypes;
+        [Space] 
+        public bool simpleTypes;
+        public bool methodParameters = true;
         
         [Space]
         public Color bgColor = new Color32(30, 30, 30, 255);
