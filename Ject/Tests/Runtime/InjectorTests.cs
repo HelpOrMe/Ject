@@ -2,7 +2,7 @@
 using Ject.Contracts;
 using Ject.Dependencies.Extensions;
 using Ject.Injection;
-using Toolkit;
+using Ject.Toolkit;
 using NUnit.Framework;
 
 namespace Ject.RuntimeTests

@@ -1,7 +1,7 @@
 ﻿using System;
 using Ject.Contracts;
 using Ject.Dependencies.Generic;
-using Toolkit;
+using Ject.Toolkit;
 
 namespace Ject.Dependencies.Extensions
 {

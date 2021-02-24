@@ -4,11 +4,10 @@ using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
 using Ject.Dependencies.Extensions;
 using Ject.Injection;
-using Toolkit;
+using Ject.Toolkit;
 using Ject.Usage;
 using Ject.Usage.Scene;
 using NUnit.Framework;
-using Toolkit.Collections;
 using UnityEngine;
 
 namespace Ject.RuntimeTests

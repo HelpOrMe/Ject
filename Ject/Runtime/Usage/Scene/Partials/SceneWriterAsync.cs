@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Toolkit;
+using Ject.Toolkit;
 using UnityEngine;
 
 namespace Ject.Usage.Scene
@@ -13,7 +13,7 @@ namespace Ject.Usage.Scene
             
             foreach (Identifier id in ContractWriters.ContractIds)
             {
-                contracts[id] = ContractWriters.WriteContract(id);
+                Contracts[id] = ContractWriters.WriteContract(id);
                 await Task.Yield();
             }
             
@@ -25,8 +25,8 @@ namespace Ject.Usage.Scene
             
             AfterWrite?.Invoke();
             
-            contracts.Clear();
-            contextContracts.Clear();
+            Contracts.Clear();
+            ContextContracts.Clear();
         }
     }
 }

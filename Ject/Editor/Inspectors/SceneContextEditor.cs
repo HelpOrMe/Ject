@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using Toolkit;
+using Ject.Toolkit;
 using Ject.Usage;
 using Ject.Usage.Scene;
 using JectEditor.Inspectors.Contexts;

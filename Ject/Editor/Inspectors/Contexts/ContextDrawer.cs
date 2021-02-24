@@ -2,11 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using Ject.Injection;
-using Toolkit;
+using Ject.Toolkit;
 using Ject.Usage;
 using Ject.Usage.Scene;
 using JectEditor.Preferences;
-using Toolkit.Collections;
 using ToolkitEditor;
 using ToolkitEditor.Extensions;
 using UnityEditor;

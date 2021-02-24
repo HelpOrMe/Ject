@@ -2,12 +2,11 @@
     "name": "Ject.RuntimeTests",
     "rootNamespace": "Ject.RuntimeTests",
     "references": [
-        "GUID:24e1f7aec38f7054d8637ce60d0b430c",
-        "GUID:27619889b8ba8c24980f49ee34dbb44a",
-        "GUID:5096fdd78a1bc5745be2a1d67240dad3",
-        "GUID:fa711d186eed0b54199ddda7b3f393f3"
+        "GUID:24e1f7aec38f7054d8637ce60d0b430c"
     ],
-    "includePlatforms": [],
+    "includePlatforms": [
+        "Editor"
+    ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": true,

@@ -1,11 +1,11 @@
 ﻿using System;
-using Toolkit;
+using Ject.Toolkit;
 
 namespace Ject.Contracts
 {
     public class EmptySignedContract : ISignedContract
     {
-        public static EmptySignedContract instance = new EmptySignedContract();
+        public static readonly EmptySignedContract Instance = new EmptySignedContract();
         
         public void AddContract(ISignedContract contract) { }
         public bool CanResolve(Type type, Identifier id = default) => false;

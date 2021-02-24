@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using Ject.Contracts;
-using Toolkit;
+using Ject.Toolkit;
 using UnityEditor;
 using UnityEngine;
 
@@ -55,7 +55,7 @@ namespace Ject.Usage
             if (!RawData.contractWriterTypeNames.ContainsKey(contractId))
             {
                 Debug.LogError("Invalid contract id " + contractId);
-                return EmptySignedContract.instance;
+                return EmptySignedContract.Instance;
             }
             
             ContractWriter contractWriter = NewWriter(RawData.contractWriterTypeNames[contractId]);

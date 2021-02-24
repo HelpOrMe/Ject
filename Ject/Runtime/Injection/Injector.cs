@@ -1,19 +1,19 @@
 ﻿using System.Collections.Generic;
 using System.Reflection;
 using Ject.Contracts;
-using Toolkit;
+using Ject.Toolkit;
 
 namespace Ject.Injection
 {
     public class Injector : InjectorBase
     {
-        public ISignedContract contract;
+        public ISignedContract Contract;
 
-        public Injector(object patient) : this(patient, EmptySignedContract.instance) { }
+        public Injector(object patient) : this(patient, EmptySignedContract.Instance) { }
         
         public Injector(object patient, ISignedContract contract) : base(patient)
         {
-            this.contract = contract;
+            this.Contract = contract;
         }
 
         public void Inject(InjectionInfo info)
@@ -46,13 +46,13 @@ namespace Ject.Injection
         public void InjectField(string name, Identifier dependencyId = default)
         {
             FieldInfo field = GetField(name);
-            field.SetValue(patient, contract.Resolve(field.FieldType, dependencyId));
+            field.SetValue(Patient, Contract.Resolve(field.FieldType, dependencyId));
         }
         
         public void InjectProperty(string name, Identifier dependencyId = default)
         {
             PropertyInfo property = GetProperty(name);
-            property.SetValue(patient, contract.Resolve(property.PropertyType, dependencyId));
+            property.SetValue(Patient, Contract.Resolve(property.PropertyType, dependencyId));
         }
 
         public object InjectMethod(string name) => InjectMethod(name, new Dictionary<string, Identifier>());
@@ -67,10 +67,10 @@ namespace Ject.Injection
             {
                 ParameterInfo parameter = parameters[i];
                 Identifier id = dependencyIds.ContainsKey(parameter.Name) ? dependencyIds[parameter.Name] : default;
-                parameterValues[i] = contract.Resolve(parameter.ParameterType, id);
+                parameterValues[i] = Contract.Resolve(parameter.ParameterType, id);
             }
 
-            return method.Invoke(patient, parameterValues);
+            return method.Invoke(Patient, parameterValues);
         }
     }
 }

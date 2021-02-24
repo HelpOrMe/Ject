@@ -4,8 +4,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Ject.Usage;
 using Ject.Usage.Scene;
-using Toolkit;
-using Toolkit.Collections;
+using Ject.Toolkit;
 using ToolkitEditor.Extensions;
 using UnityEngine;
 
