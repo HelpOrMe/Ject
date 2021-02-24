@@ -6,7 +6,7 @@ using Toolkit;
 using Ject.Usage;
 using Ject.Usage.Scene;
 using JectEditor.Preferences;
-using Toolkit.Collections;
+using Toolkit.Serializable;
 using ToolkitEditor;
 using ToolkitEditor.Extensions;
 using UnityEditor;

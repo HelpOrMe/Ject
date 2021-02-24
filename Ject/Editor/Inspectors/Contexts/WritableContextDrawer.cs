@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 using Ject.Usage;
 using Ject.Usage.Scene;
 using Toolkit;
-using Toolkit.Collections;
+using Toolkit.Serializable;
 using ToolkitEditor.Extensions;
 using UnityEngine;
 
