@@ -24,10 +24,10 @@ namespace Ject.Usage.Scene
 
         public MonoContextAccess contextAccess;
 
-        protected readonly Dictionary<Identifier, ISignedContract> contracts = 
+        protected readonly Dictionary<Identifier, ISignedContract> Contracts = 
             new Dictionary<Identifier, ISignedContract>();
         
-        protected readonly Dictionary<Context, ISignedContract> contextContracts = 
+        protected readonly Dictionary<Context, ISignedContract> ContextContracts = 
             new Dictionary<Context, ISignedContract>();
         
         public enum WriteEntrypoint
@@ -90,7 +90,7 @@ namespace Ject.Usage.Scene
             
             foreach (Identifier id in ContractWriters.ContractIds)
             {
-                contracts[id] = ContractWriters.WriteContract(id);
+                Contracts[id] = ContractWriters.WriteContract(id);
             }
         
             foreach (Component component in componentContexts.Keys)
@@ -114,23 +114,23 @@ namespace Ject.Usage.Scene
                     continue;
                 }
                     
-                injector.contract = GetContextContract(context);
+                injector.Contract = GetContextContract(context);
                 injector.Inject(context.injectionInfo);
             }
         }
         
         protected ISignedContract GetContextContract(Context context)
         {
-            if (contextContracts.ContainsKey(context))
-                return contextContracts[context];
+            if (ContextContracts.ContainsKey(context))
+                return ContextContracts[context];
             
-            ISignedContract groupedContract = contracts[context.usedContractWriterIds.First()];
+            ISignedContract groupedContract = Contracts[context.usedContractWriterIds.First()];
             for (int i = 1; i < context.usedContractWriterIds.Length; i++)
             {
-                groupedContract.AddContract(contracts[context.usedContractWriterIds[i]]);
+                groupedContract.AddContract(Contracts[context.usedContractWriterIds[i]]);
             }
 
-            return contextContracts[context] = groupedContract;
+            return ContextContracts[context] = groupedContract;
         }
     }
 }

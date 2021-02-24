@@ -7,18 +7,18 @@ namespace Ject.Injection
     {
         public const BindingFlags Flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
-        protected readonly object patient;
-        protected readonly Type patientType;
+        protected readonly object Patient;
+        protected readonly Type PatientType;
 
         protected InjectorBase(object patient)
         {
-            this.patient = patient;
-            patientType = patient.GetType();
+            Patient = patient;
+            PatientType = patient.GetType();
         }
         
         protected FieldInfo GetField(string name)
         {
-            FieldInfo field = patientType.GetField(name, Flags);
+            FieldInfo field = PatientType.GetField(name, Flags);
             if (field == null)
                 throw new MissingMemberException(MemberNullMessage("field", name));
 
@@ -27,7 +27,7 @@ namespace Ject.Injection
             
         protected PropertyInfo GetProperty(string name)
         {
-            PropertyInfo property = patientType.GetProperty(name, Flags);
+            PropertyInfo property = PatientType.GetProperty(name, Flags);
             if (property == null) 
                 throw new MissingMemberException(MemberNullMessage("property", name));
 
@@ -36,7 +36,7 @@ namespace Ject.Injection
         
         protected MethodInfo GetMethod(string name)
         {
-            MethodInfo method = patientType.GetMethod(name, Flags);
+            MethodInfo method = PatientType.GetMethod(name, Flags);
             if (method == null)
                 throw new MissingMemberException(MemberNullMessage("method", name));
 
@@ -44,6 +44,6 @@ namespace Ject.Injection
         }
         
         protected string MemberNullMessage(string member, string memberName) 
-            => $"Invalid {member} name {patientType.Name}:{memberName}";
+            => $"Invalid {member} name {PatientType.Name}:{memberName}";
     }
 }
