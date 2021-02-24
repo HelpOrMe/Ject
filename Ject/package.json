@@ -1,6 +1,6 @@
 {
   "name": "ject",
-  "version": "0.10.0",
+  "version": "0.10.2",
   "displayName": "Ject",
   "keywords": [],
   "author": {
@@ -9,7 +9,5 @@
   },
   "type": "library",
   "hideInEditor": true,
-  "dependencies": {
-    "toolkit": "0.1.0"
-  }
+  "dependencies": { }
 }
