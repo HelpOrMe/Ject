@@ -7,7 +7,7 @@ using Ject.Toolkit;
 using Ject.Usage;
 using Ject.Usage.Scene;
 using JectEditor.Inspectors.Contexts;
-using JectEditor.Toolkit;
+using ToolkitEditor;
 using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -55,19 +55,19 @@ namespace JectEditor.Inspectors
 
         private void IndexContracts(Assembly assembly)
         {
-            Type contractWriterType = typeof(ContractWriter);
+            Type contractWriterBaseType = typeof(ContractWriter);
             
             foreach (Type type in assembly.GetTypes())
             {
-                if (!contractWriterType.IsAssignableFrom(type)) 
+                if (!contractWriterBaseType.IsAssignableFrom(type)) 
                     continue;
-                
+
                 var id = new Identifier(type.Name);
                 ContractWriters.RawData.contractWriterTypeNames[id] = type.AssemblyQualifiedName;
                 
                 if (!ContractWriters.RawData.contractWriterNames.ContainsKey(id))
                 {
-                    ContractWriters.RawData.contractWriterNames[id] = type.Name;
+                    ContractWriters.RawData.contractWriterNames[id] = type.Name.Replace("ContractWriter", "");
                 }
             }
         }

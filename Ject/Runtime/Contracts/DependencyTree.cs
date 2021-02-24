@@ -70,11 +70,16 @@ namespace Ject.Contracts
         public IDependency FindDependency(Identifier id) 
             => _dependenciesById.ContainsKey(id) ? _dependenciesById[id] : null;
 
-        public IDependency FindDependency(Type type, Identifier id = default)
+        public IDependency FindDependency(Type baseType, Identifier id = default)
         {
-            if (!_dependencies.ContainsKey(type) || !_dependencies[type].ContainsKey(id))
-                return null;
-            return _dependencies[type][id];
+            for (Type type = baseType; type != null; type = type.BaseType)
+            {
+                if (_dependencies.ContainsKey(type) && _dependencies[type].ContainsKey(id))
+                {
+                    return _dependencies[type][id];
+                }
+            }
+            return null;
         }
     }
 }

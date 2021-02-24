@@ -1,7 +1,11 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 using Ject.Usage;
 using Ject.Usage.Scene;
+using Ject.Toolkit;
+using ToolkitEditor.Extensions;
 using UnityEngine;
 
 namespace JectEditor.Inspectors.Contexts
@@ -9,7 +13,8 @@ namespace JectEditor.Inspectors.Contexts
     public class WritableContextDrawer : ContextDrawer
     {
         private readonly string _contextName;
-
+        private readonly Dictionary<string, string> _methodParametersBuffer = new Dictionary<string, string>();
+        
         public WritableContextDrawer(Context context, ContractWritersRawData writersRawData, string contextName) 
             : base(context, writersRawData)
         {
@@ -48,106 +53,170 @@ namespace JectEditor.Inspectors.Contexts
             DrawAddMember();
         }
 
-        protected void DrawField(int index)
+        private void DrawField(int index)
         {
             BeginLine();
-            DrawLabel("public", ModStyle);
-            DrawLabel("object", ModStyle);
+            DrawLabel("public", TextStyles.ModStyle);
+            DrawLabel("object", TextStyles.ModStyle);
 
-            string name = InjectionInfo.fieldNames[index];
-            InjectionInfo.fieldNames[index] = DrawText(name, TextStyle);
+            string fieldName = InjectionInfo.fieldNames[index];
+            InjectionInfo.fieldNames[index] = DrawText(fieldName, TextStyles.TextStyle);
             
-            DrawLabel(";", TextStyle, -1);
+            DrawLabel(";", TextStyles.TextStyle, -1);
 
             if (Rect.Contains(Event.current.mousePosition) 
-                || InjectionInfo.fieldDependencyIds.ContainsKey(name))
+                || InjectionInfo.fieldDependencyIds.ContainsKey(fieldName))
             {
-                DrawComment(InjectionInfo.fieldDependencyIds, name);
+                DrawMemberDependencyId(InjectionInfo.fieldDependencyIds, fieldName);
             }
 
             if (RemoveButton())
             {
                 InjectionInfo.fieldNames[index] = null;
                 InjectionInfo.fieldNames = InjectionInfo.fieldNames.Where(n => n != null).ToArray();
-                InjectionInfo.fieldDependencyIds.Remove(name);
+                InjectionInfo.fieldDependencyIds.Remove(fieldName);
             }
         }
 
-        protected void DrawProperty(int index)
+        private void DrawProperty(int index)
         {
             BeginLine();
-            DrawLabel("public", ModStyle);
-            DrawLabel("object", ModStyle);
+            DrawLabel("public", TextStyles.ModStyle);
+            DrawLabel("object", TextStyles.ModStyle);
             
-            string name = InjectionInfo.propertyNames[index];
-            InjectionInfo.propertyNames[index] = DrawText(name, TextStyle);
+            string propertyName = InjectionInfo.propertyNames[index];
+            InjectionInfo.propertyNames[index] = DrawText(propertyName, TextStyles.TextStyle);
             
-            DrawLabel("{", TextStyle);
-            DrawLabel("get", ModStyle);
-            DrawLabel(";", TextStyle, -1);
-            DrawLabel("set", ModStyle);
-            DrawLabel(";", TextStyle, -1);
-            DrawLabel("}", TextStyle);
+            DrawLabel("{", TextStyles.TextStyle);
+            DrawLabel("get", TextStyles.ModStyle);
+            DrawLabel(";", TextStyles.TextStyle, -1);
+            DrawLabel("set", TextStyles.ModStyle);
+            DrawLabel(";", TextStyles.TextStyle, -1);
+            DrawLabel("}", TextStyles.TextStyle);
             
             if (Rect.Contains(Event.current.mousePosition) 
-                || InjectionInfo.propertyDependencyIds.ContainsKey(name))
+                || InjectionInfo.propertyDependencyIds.ContainsKey(propertyName))
             {
-                DrawComment(InjectionInfo.propertyDependencyIds, name);
+                DrawMemberDependencyId(InjectionInfo.propertyDependencyIds, propertyName);
             }
             
             if (RemoveButton())
             {
                 InjectionInfo.propertyNames[index] = null;
                 InjectionInfo.propertyNames = InjectionInfo.propertyNames.Where(n => n != null).ToArray();
-                InjectionInfo.propertyDependencyIds.Remove(name);
+                InjectionInfo.propertyDependencyIds.Remove(propertyName);
             }
         }
         
-        protected void DrawMethod(int index)
+        private void DrawMethod(int index)
         {
             BeginLine();
-            DrawLabel("public", ModStyle);
-            DrawLabel("void", ModStyle);
+            DrawLabel("public", TextStyles.ModStyle);
+            DrawLabel("void", TextStyles.ModStyle);
             
-            string name = InjectionInfo.methodNames[index];
-            InjectionInfo.methodNames[index] = DrawText(name, TextStyle);
+            string methodName = InjectionInfo.methodNames[index];
+            InjectionInfo.methodNames[index] = DrawText(methodName, TextStyles.TextStyle);
             
-            DrawLabel("(...) {   }", TextStyle, -1);
-            
+            DrawLabel("(", TextStyles.TextStyle, -1);
             if (Rect.Contains(Event.current.mousePosition) 
-                || InjectionInfo.methodDependencyIds.ContainsKey(name))
+                || InjectionInfo.methodDependencyIds.ContainsKey(methodName))
             {
-                DrawMethodComment(name);
+                DrawMethodParameterDependencyIds(methodName);
             }
+            DrawLabel(")", TextStyles.TextStyle, -1);
+            DrawLabel("{ }", TextStyles.TextStyle);
             
             if (RemoveButton())
             {
                 InjectionInfo.methodNames[index] = null;
                 InjectionInfo.methodNames = InjectionInfo.methodNames.Where(n => n != null).ToArray();
-                InjectionInfo.methodDependencyIds.Remove(name);
+                InjectionInfo.methodDependencyIds.Remove(methodName);
             }
         }
 
+        private void DrawMethodParameterDependencyIds(string methodName)
+        {
+            if (_methodParametersBuffer.ContainsKey(methodName))
+            {
+                string newText = DrawText(_methodParametersBuffer[methodName], TextStyles.ValueStyle, -1);
+                if (newText != _methodParametersBuffer[methodName])
+                {
+                    _methodParametersBuffer[methodName] = newText;
+                }
+                else return;
+            }
+            else
+            {
+                if (InjectionInfo.methodDependencyIds.ContainsKey(methodName))
+                {
+                    _methodParametersBuffer[methodName]= GetParameterDependencyIdsText(methodName);
+                }
+                else
+                {
+                    const string text = "param = None, ..."; 
+                    string newText = DrawText(text, TextStyles.ValueStyle, -1);
+                
+                    if (newText != text)
+                    {
+                        _methodParametersBuffer[methodName] = newText;
+                    }
+                    else return;
+                }
+            }
+            
+            ParseParameterDependencyIdsText(methodName, _methodParametersBuffer[methodName]);
+        }
+
+        private string GetParameterDependencyIdsText(string methodName)
+        {
+            var builder = new StringBuilder();
+            
+            foreach (KeyValuePair<string, Identifier> keyValuePair in InjectionInfo.methodDependencyIds[methodName])
+            {
+                builder.Append(keyValuePair.Key).Append(" = ").Append(keyValuePair.Value.ToString()).Append(", ");
+            }
+            builder.Remove(builder.Length - 2, 2);
+            
+            return builder.ToString();
+        }
+
+        private void ParseParameterDependencyIdsText(string methodName, string text)
+        {
+            if (text.Replace(" ", "") == "")
+            {
+                _methodParametersBuffer.Remove(methodName);
+                InjectionInfo.methodDependencyIds.Remove(methodName);
+                return;
+            }
+            
+            var dependencyIds = new SerializableDictionary<string, Identifier>();
+
+            foreach (string pairText in Regex.Split(text, @"\s*,\s*"))
+            {
+                string[] pair = Regex.Split(pairText, @"\s*=\s*");
+                if (pair.Length == 2)
+                {
+                    dependencyIds[pair[0]] = new Identifier(pair[1]);
+                }
+            }
+
+            if (dependencyIds.Count > 0)
+            {
+                InjectionInfo.methodDependencyIds[methodName] = dependencyIds;
+            }
+        }
+        
         private void DrawAddMember()
         {
             BeginLine();
             string[] names = {"Add member..", "Field", "Property", "Method"};
             
-            int selected = DrawPopup(0, names, new GUIStyle(TextStyle) {fontStyle = FontStyle.Italic});
+            int selected = DrawPopup(0, names, TextStyles.TextStyle.FontStyledClone(FontStyle.Italic));
             switch (selected)
             {
-                case 1:
-                    Array.Resize(ref InjectionInfo.fieldNames, InjectionInfo.fieldNames.Length + 1);
-                    InjectionInfo.fieldNames[InjectionInfo.fieldNames.GetUpperBound(0)] = "FieldName";
-                    break;
-                case 2:
-                    Array.Resize(ref InjectionInfo.propertyNames, InjectionInfo.propertyNames.Length + 1);
-                    InjectionInfo.propertyNames[InjectionInfo.propertyNames.GetUpperBound(0)] = "PropertyName";
-                    break;
-                case 3:
-                    Array.Resize(ref InjectionInfo.methodNames, InjectionInfo.methodNames.Length + 1);
-                    InjectionInfo.methodNames[InjectionInfo.methodNames.GetUpperBound(0)] = "MethodName";
-                    break;
+                case 1: AddToArray(ref InjectionInfo.fieldNames, "Field"); break;
+                case 2: AddToArray(ref InjectionInfo.propertyNames, "Property"); break;
+                case 3: AddToArray(ref InjectionInfo.methodNames, "Method");  break;
             }
         }
     }

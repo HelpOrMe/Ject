@@ -2,7 +2,9 @@
     "name": "Ject.Editor",
     "rootNamespace": "JectEditor",
     "references": [
-        "GUID:24e1f7aec38f7054d8637ce60d0b430c"
+        "GUID:24e1f7aec38f7054d8637ce60d0b430c",
+        "GUID:5096fdd78a1bc5745be2a1d67240dad3",
+        "GUID:fa711d186eed0b54199ddda7b3f393f3"
     ],
     "includePlatforms": [
         "Editor"

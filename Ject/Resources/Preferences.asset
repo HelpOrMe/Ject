@@ -12,8 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a9e81beecdc4dfbae615f020eddf687, type: 3}
   m_Name: Preferences
   m_EditorClassIdentifier: 
-  resourcesPath: Packages/ject/Resources/
   simpleTypes: 0
+  methodParameters: 1
+  privateMembers: 1
   bgColor: {r: 0.11764706, g: 0.11764706, b: 0.11764706, a: 1}
   modColor: {r: 0.3372549, g: 0.6117647, b: 0.8392157, a: 1}
   typeColor: {r: 0.30588236, g: 0.7882353, b: 0.6901961, a: 1}
