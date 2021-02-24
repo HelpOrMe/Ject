@@ -7,7 +7,7 @@ using Ject.Toolkit;
 using Ject.Usage;
 using Ject.Usage.Scene;
 using JectEditor.Inspectors.Contexts;
-using ToolkitEditor;
+using JectEditor.Toolkit;
 using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;

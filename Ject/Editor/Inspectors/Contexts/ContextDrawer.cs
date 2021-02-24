@@ -6,8 +6,8 @@ using Ject.Toolkit;
 using Ject.Usage;
 using Ject.Usage.Scene;
 using JectEditor.Preferences;
-using ToolkitEditor;
-using ToolkitEditor.Extensions;
+using JectEditor.Toolkit;
+using JectEditor.Toolkit.Extensions;
 using UnityEditor;
 using UnityEngine;
 
