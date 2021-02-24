@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 using Ject.Usage;
 using Ject.Usage.Scene;
 using Ject.Toolkit;
-using ToolkitEditor.Extensions;
+using JectEditor.Toolkit.Extensions;
 using UnityEngine;
 
 namespace JectEditor.Inspectors.Contexts

@@ -1,5 +1,5 @@
 ﻿using JectEditor.Preferences;
-using ToolkitEditor.Extensions;
+using JectEditor.Toolkit.Extensions;
 using UnityEditor;
 using UnityEngine;
 
