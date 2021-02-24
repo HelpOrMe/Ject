@@ -2,12 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Text.RegularExpressions;
 using Ject.Usage;
 using Ject.Usage.Scene;
 using JectEditor.Preferences;
-using ToolkitEditor.Extensions;
 using UnityEngine;
 
 namespace JectEditor.Inspectors.Contexts
@@ -18,10 +16,7 @@ namespace JectEditor.Inspectors.Contexts
         private static readonly string IgnoreRegex = @"(__BackingField|add_|remove_|get_|set_)";
         
         private readonly Type _type;
-        private bool _strikeThrough;
 
-        private Rect TextRect => Rect.WithW(LastRect.xMax); 
-        
         public TypedContextDrawer(Context context, ContractWritersRawData writersRawData, Type type)
             : base(context, writersRawData)
         {
@@ -54,78 +49,134 @@ namespace JectEditor.Inspectors.Contexts
         
         protected override void DrawBody()
         {
-            DrawHeader(_type.Name);
+            DrawHeader(_type.Name + "Context");
             Indent++;
             DrawMembers();
             Indent--;
             DrawFooter();
         }
-
+        
         private void DrawMembers()
         {
             const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
-            bool propertyOrFieldDrawn = false;
-            
-            foreach (FieldInfo field in _type.GetFields(flags))
+
+            foreach (string fieldName in InjectionInfo.fieldNames.ToList())
             {
-                if (!IgnoreMembers.Contains(field.Name) 
-                    && !Regex.IsMatch(field.Name, IgnoreRegex))
+                FieldInfo field = _type.GetField(fieldName, flags);
+                if (field == null)
                 {
-                    DrawField(field);
-                    propertyOrFieldDrawn = true;
+                    InjectionInfo.fieldNames = InjectionInfo.fieldNames.Where(name => name != fieldName).ToArray();
+                    continue;
                 }
+                DrawField(field);
             }
             
-            foreach (PropertyInfo property in _type.GetProperties(flags))
+            foreach (string propertyName in InjectionInfo.propertyNames.ToList())
             {
-                if (!IgnoreMembers.Contains(property.Name) 
-                    && !Regex.IsMatch(property.Name, IgnoreRegex))
+                PropertyInfo property = _type.GetProperty(propertyName, flags);
+                if (property == null)
                 {
-                    DrawProperty(property);
-                    propertyOrFieldDrawn = true;
+                    InjectionInfo.propertyNames = InjectionInfo.propertyNames
+                        .Where(name => name != propertyName).ToArray();
+                    continue;
                 }
+                DrawProperty(property);
             }
 
-            if (propertyOrFieldDrawn)
+            if ((InjectionInfo.fieldNames.Length > 0 || InjectionInfo.propertyNames.Length > 0) 
+                && InjectionInfo.methodNames.Length > 0)
             {
                 BeginLine();
             }
             
-            foreach (MethodInfo method in _type.GetMethods(flags))
+            foreach (string methodName in InjectionInfo.methodNames.ToList())
             {
-                if (!IgnoreMembers.Contains(method.Name) 
-                    && !Regex.IsMatch(method.Name, IgnoreRegex))
+                MethodInfo method = _type.GetMethod(methodName, flags);
+                if (method == null)
                 {
-                    DrawMethod(method);
+                    InjectionInfo.methodNames = InjectionInfo.methodNames.Where(name => name != methodName).ToArray();
+                    continue;
                 }
+                DrawMethod(method);
             }
 
-            _strikeThrough = false;
+            DrawAddMember();
         }
 
+        private void DrawAddMember()
+        {
+            BindingFlags flags = BindingFlags.Instance | BindingFlags.Public;
+            if (PreferencesManager.Preferences.privateMembers)
+            {
+                flags |= BindingFlags.NonPublic;
+            }
+
+            List<FieldInfo> fields = FilterMembers(_type.GetFields(flags));
+            List<PropertyInfo> properties = FilterMembers(_type.GetProperties(flags));
+            List<MethodInfo> methods = FilterMembers(_type.GetMethods(flags));
+            
+            var names = new List<string>{"Add member..."};
+            names.AddRange(fields.Select(field => field.Name));
+            names.AddRange(properties.Select(property => property.Name));
+            names.AddRange(methods.Select(method => method.Name));
+         
+            BeginLine();
+            int selected = DrawPopup(0, names.ToArray(), 
+                new GUIStyle(TextStyles.TextStyle) {fontStyle = FontStyle.Italic});
+
+            if (selected == 0)
+                return;
+
+            int ramp = fields.Count;
+            if (selected < ramp)
+            {
+                AddToArray(ref InjectionInfo.fieldNames, names[selected]);
+                return;
+            }
+
+            ramp += properties.Count;
+            if (selected < ramp)
+            {
+                AddToArray(ref InjectionInfo.propertyNames, names[selected]);
+                return;
+            }
+
+            ramp += methods.Count;
+            if (selected < ramp)
+            {
+                AddToArray(ref InjectionInfo.methodNames, names[selected]);
+            }
+        }
+
+        private List<T> FilterMembers<T>(T[] members) where T : MemberInfo 
+            =>  members.Where(method => !IgnoreMembers.Contains(method.Name) 
+                                        && !Regex.IsMatch(method.Name, IgnoreRegex)
+                                        && !InjectionInfo.methodNames.Contains(method.Name))
+                .ToList();
+        
         private void DrawField(FieldInfo field)
         {
             string modifier = "public";
             if (field.IsFamily) modifier = "protected";
             if (field.IsPrivate) modifier = "private";
 
-            _strikeThrough = !InjectionInfo.fieldNames.Contains(field.Name);
-            
             BeginLine();
-            DrawLabel(modifier, ModStyle);
+            DrawLabel(modifier, TextStyles.ModStyle);
             DrawType(field.FieldType);
-            DrawLabel(field.Name, TextStyle);
-            DrawLabel(";", TextStyle, -1);
+            DrawLabel(field.Name, TextStyles.TextStyle);
 
-            if (Event.current.type == EventType.MouseDown && TextRect.Contains(Event.current.mousePosition))
-            {
-                InjectionInfo.fieldNames = SwitchItem(InjectionInfo.fieldNames, field.Name);
-            }
-            
             if (Rect.Contains(Event.current.mousePosition) 
                 || InjectionInfo.fieldDependencyIds.ContainsKey(field.Name))
             {
-                DrawComment(InjectionInfo.fieldDependencyIds, field.Name);
+                DrawMemberDependencyId(InjectionInfo.fieldDependencyIds, field.Name);
+            }
+
+            DrawLabel(";", TextStyles.TextStyle, -1);
+            
+            if (RemoveButton())
+            {
+                InjectionInfo.fieldNames = RemoveFromArray(InjectionInfo.fieldNames, field.Name);
+                InjectionInfo.fieldDependencyIds.Remove(field.Name);
             }
         }
 
@@ -142,28 +193,26 @@ namespace JectEditor.Inspectors.Contexts
             if (property.GetMethod.IsFamily) getModifier = "protected ";
             if (property.GetMethod.IsPrivate) getModifier = "private" ;
 
-            _strikeThrough = !InjectionInfo.propertyNames.Contains(property.Name);
-            
             BeginLine();
-            DrawLabel("public", ModStyle);
+            DrawLabel("public", TextStyles.ModStyle);
             DrawType(property.PropertyType);
-            DrawLabel(property.Name, TextStyle);
-            DrawLabel("{", TextStyle);
-            DrawLabel(getModifier + "get", ModStyle);
-            DrawLabel(";", TextStyle, -1);
-            DrawLabel(setModifier + "set", ModStyle);
-            DrawLabel(";", TextStyle, -1);
-            DrawLabel("}", TextStyle);
+            DrawLabel(property.Name, TextStyles.TextStyle);
+            DrawLabel("{", TextStyles.TextStyle);
+            DrawLabel(getModifier + "get", TextStyles.ModStyle);
+            DrawLabel(";", TextStyles.TextStyle, -1);
+            DrawLabel(setModifier + "set", TextStyles.ModStyle);
+            DrawLabel("; }", TextStyles.TextStyle, -1);
 
-            if (Event.current.type == EventType.MouseDown && TextRect.Contains(Event.current.mousePosition))
-            {
-                InjectionInfo.propertyNames = SwitchItem(InjectionInfo.propertyNames, property.Name);
-            }
-            
             if (Rect.Contains(Event.current.mousePosition) 
                 || InjectionInfo.propertyDependencyIds.ContainsKey(property.Name))
             {
-                DrawComment(InjectionInfo.propertyDependencyIds, property.Name);
+                DrawMemberDependencyId(InjectionInfo.propertyDependencyIds, property.Name);
+            }
+
+            if (RemoveButton())
+            {
+                InjectionInfo.propertyNames = RemoveFromArray(InjectionInfo.propertyNames, property.Name);
+                InjectionInfo.propertyDependencyIds.Remove(property.Name);
             }
         }
 
@@ -173,77 +222,52 @@ namespace JectEditor.Inspectors.Contexts
             if (method.IsFamily) modifier = "protected";
             if (method.IsPrivate) modifier = "private";
 
-            _strikeThrough = !InjectionInfo.methodNames.Contains(method.Name);
-            
             BeginLine();
-            DrawLabel(modifier, ModStyle);
+            DrawLabel(modifier, TextStyles.ModStyle);
             DrawType(method.ReturnType);
-            DrawLabel(method.Name, TextStyle);
-            DrawLabel("(", TextStyle, -1);
+            DrawLabel(method.Name, TextStyles.TextStyle);
+            DrawLabel("(", TextStyles.TextStyle, -1);
+            DrawMethodParameters(method);
+            DrawLabel(") { }", TextStyles.TextStyle, -1);
 
-            if (PreferencesManager.Preferences.methodParameters)
+            if (RemoveButton())
             {
-                ParameterInfo[] parameters = method.GetParameters();
-                foreach (ParameterInfo parameter in parameters)
+                InjectionInfo.methodNames = RemoveFromArray(InjectionInfo.methodNames, method.Name);
+                InjectionInfo.methodDependencyIds.Remove(method.Name);
+            }
+        }
+
+        private void DrawMethodParameters(MethodInfo method)
+        {
+            float methodParamsBeginX = LastRect.xMax;
+
+            bool dependencyIdsExists = InjectionInfo.methodDependencyIds.ContainsKey(method.Name);
+            bool drawDependencyIds = Rect.Contains(Event.current.mousePosition) || dependencyIdsExists;
+            
+            ParameterInfo[] parameters = method.GetParameters();
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                ParameterInfo parameter = parameters[i];
+                
+                if (dependencyIdsExists && i > 0)
                 {
-                    DrawType(parameter.ParameterType, -1);
-                    DrawLabel(parameter.Name, TextStyle);
-                    if (parameters[parameters.GetUpperBound(0)] != parameter)
-                    {
-                        DrawLabel(", ", TextStyle, -1);
-                    }
+                    BeginLine();
+                    LastRect.xMax = methodParamsBeginX;
+                }
+
+                DrawType(parameter.ParameterType, -1);
+                DrawLabel(parameter.Name, TextStyles.TextStyle);
+
+                if (drawDependencyIds)
+                {
+                    DrawParameterDependencyId(method.Name, parameter.Name);
+                }
+                
+                if (parameters[parameters.GetUpperBound(0)] != parameter)
+                {
+                    DrawLabel(", ", TextStyles.TextStyle, -1);
                 }
             }
-            
-            
-            DrawLabel(") { }", TextStyle, -1);
-            
-            if (Event.current.type == EventType.MouseDown && TextRect.Contains(Event.current.mousePosition))
-            {
-                InjectionInfo.methodNames = SwitchItem(InjectionInfo.methodNames, method.Name);
-            }
-            
-            if (Rect.Contains(Event.current.mousePosition) 
-                || InjectionInfo.methodDependencyIds.ContainsKey(method.Name))
-            {
-                DrawMethodComment(method.Name);
-            }
-        }
-        
-        private string[] SwitchItem(string[] array, string item)
-        {
-            if (array.Contains(item))
-            {
-                return array.Where(arrayItem => arrayItem != item).ToArray();
-            }
-            
-            Array.Resize(ref array, array.Length + 1);
-            array[array.GetUpperBound(0)] = item;
-            return array;
-        }
-    
-        protected override string DrawText(string text, GUIStyle style, float space = 4)
-        {
-            if (_strikeThrough)
-            {
-                DrawLabel(text, style, space);
-                return text;
-            }
-            return base.DrawText(text, style, space);
-        }
-        
-        protected override void DrawLabel(string label, GUIStyle style, float space = 4) 
-            => base.DrawLabel(_strikeThrough ? StrikeThrough(label) : label, style, space);
-
-        private string StrikeThrough(string text)
-        {
-            var builder = new StringBuilder();
-            foreach (char chr in text)
-            {
-                builder.Append(chr);
-                builder.Append('\u0336');
-            }
-            return builder.ToString();
         }
     }
 }
