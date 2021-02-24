@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using Ject.Injection;
 using Toolkit;
 using Ject.Usage;
 using Ject.Usage.Scene;
-using Toolkit.Collections;
 using JectEditor.Preferences;
+using Toolkit.Collections;
 using ToolkitEditor;
 using ToolkitEditor.Extensions;
 using UnityEditor;
@@ -18,9 +17,10 @@ namespace JectEditor.Inspectors.Contexts
     public abstract class ContextDrawer
     {
         protected readonly Context Context;
-        protected readonly ContractWritersRawData writersRawData;
+        protected readonly ContractWritersRawData WritersRawData;
+
+        private readonly List<Rect> _lastNonLayoutRects = new List<Rect>();
         
-        protected readonly Dictionary<string, string> methodCommentsBuffer = new Dictionary<string, string>();
         protected static readonly Dictionary<string, string> SpecialTypeNames = new Dictionary<string, string>
         {
             ["Void"] = "void",
@@ -30,25 +30,6 @@ namespace JectEditor.Inspectors.Contexts
             ["String"] = "string",
             ["Boolean"] = "bool"
         };
-        
-        protected GUIStyle ModStyle => _modStyle ??= EditorStyles.label.ColoredClone(
-            PreferencesManager.Preferences.modColor);
-        private GUIStyle _modStyle;
-        protected GUIStyle TypeStyle => _typeStyle ??= EditorStyles.label.ColoredClone(
-            PreferencesManager.Preferences.typeColor);
-        private GUIStyle _typeStyle;
-        protected GUIStyle TextStyle => _textStyle ??= EditorStyles.label.ColoredClone(
-            PreferencesManager.Preferences.textColor);
-        private GUIStyle _textStyle;
-        protected GUIStyle CommentStyle => _commentStyle ??= EditorStyles.boldLabel.ColoredClone(
-            PreferencesManager.Preferences.commentColor);
-        private GUIStyle _commentStyle;
-        protected GUIStyle ErrorStyle => _errorStyle ??= EditorStyles.boldLabel.ColoredClone(
-            PreferencesManager.Preferences.errorColor);
-        private GUIStyle _errorStyle;
-        protected GUIStyle LineEnumStyle => _lineEnumStyle ??= EditorStyles.label.ColoredClone(
-            PreferencesManager.Preferences.lineEnumColor);
-        private GUIStyle _lineEnumStyle;
         
         protected InjectionInfo InjectionInfo => Context.injectionInfo;
         
@@ -61,14 +42,14 @@ namespace JectEditor.Inspectors.Contexts
         protected ContextDrawer(Context context, ContractWritersRawData writersRawData)
         {
             Context = context;
-            this.writersRawData = writersRawData;
+            WritersRawData = writersRawData;
         }
         
         public void Draw()
         {
             _lineCount = 0;
             Indent = 0;
-            
+
             _prevGUIIndent = EditorGUI.indentLevel;
             EditorGUI.indentLevel = 0;
             DrawBody();
@@ -87,107 +68,27 @@ namespace JectEditor.Inspectors.Contexts
             DrawAddContract();
             
             BeginLine();
-            DrawLabel("public class", ModStyle);
-            DrawLabel(className, TypeStyle);
+            DrawLabel("public class", TextStyles.ModStyle);
+            DrawLabel(className, TextStyles.TypeStyle);
             BeginLine();
-            DrawLabel("{", TextStyle);
+            DrawLabel("{", TextStyles.TextStyle);
         }
         
         protected void DrawUsingContract(Identifier id)
         {
             BeginLine();
             
-            DrawLabel("using", ModStyle);
-            if (writersRawData.contractWriterNames.ContainsKey(id))
-                DrawLabel(writersRawData.contractWriterNames[id], TextStyle);
+            DrawLabel("using", TextStyles.ModStyle);
+            if (WritersRawData.contractWriterNames.ContainsKey(id))
+                DrawLabel(WritersRawData.contractWriterNames[id], TextStyles.TextStyle);
             else 
-                DrawLabel("ErrorContractName", ErrorStyle);
-            DrawLabel(";", TextStyle, -1);
+                DrawLabel("ErrorContractName", TextStyles.ErrorStyle);
+            DrawLabel(";", TextStyles.TextStyle, -1);
             
             if (RemoveButton())
             {
                 Context.usedContractWriterIds = Context.usedContractWriterIds.Where(other => id != other).ToArray();
             }
-        }
-        
-        protected void DrawComment(Dictionary<string, Identifier> ids, string name)
-        {
-            DrawLabel("//", CommentStyle, 5);
-                
-            const string message = "Id";
-            Identifier id = ids.ContainsKey(name) ? ids[name] : new Identifier(message);
-                
-            string comment = DrawText(id.ToString(), CommentStyle);
-             
-            if (comment.Length == 0)
-            {
-                ids.Remove(name);
-                return;
-            }
-            if (comment != message)
-            {
-                ids[name] = new Identifier(comment);
-            }
-        }
-
-        protected void DrawMethodComment(string name)
-        {
-            DrawLabel("//", CommentStyle, 5);
-            
-            if (!InjectionInfo.methodDependencyIds.ContainsKey(name))
-            {
-                DrawMethodCommentWelcome(name);
-                return;
-            }
-            
-            if (!methodCommentsBuffer.ContainsKey(name))
-            {
-                FillMethodCommentBuffer(name);
-            }
-
-            string comment = DrawText(methodCommentsBuffer[name], CommentStyle);
-
-            if (comment.Length == 0)
-            {
-                methodCommentsBuffer.Remove(name);
-                InjectionInfo.methodDependencyIds.Remove(name);
-                return;
-            }
-
-            methodCommentsBuffer[name] = comment;
-            InjectionInfo.methodDependencyIds[name].Clear();
-            
-            foreach (string idPairComment in Regex.Split(methodCommentsBuffer[name], " *, *"))
-            {
-                string[] idPair = Regex.Split(idPairComment, " *: *");
-                if (idPair.Length == 2)
-                {
-                    InjectionInfo.methodDependencyIds[name][idPair[0]] = new Identifier(idPair[1]);
-                }
-            }
-        }
-
-        protected void DrawMethodCommentWelcome(string name)
-        {
-            const string message = "Id";
-            string comment = DrawText(message, CommentStyle);
-
-            if (comment != message)
-            {
-                InjectionInfo.methodDependencyIds[name] = new SerializableDictionary<string, Identifier>();
-                methodCommentsBuffer[name] = comment;
-            }
-        }
-
-        protected void FillMethodCommentBuffer(string name)
-        {
-            var commentPairs = new List<string>();
-            foreach (KeyValuePair<string, Identifier> pair in InjectionInfo.methodDependencyIds[name])
-            {
-                commentPairs.Add($"{pair.Key}: {pair.Value}");
-            }
-
-            methodCommentsBuffer[name] = string.Join(", ", commentPairs);
         }
         
         protected bool AddButton() 
@@ -202,11 +103,11 @@ namespace JectEditor.Inspectors.Contexts
             var names = new List<string>{"Select contract.."};
             var ids = new List<Identifier>();
             
-            foreach (Identifier id in writersRawData.contractWriterNames.Keys)
+            foreach (Identifier id in WritersRawData.contractWriterNames.Keys)
             {
                 if (!Context.usedContractWriterIds.Contains(id))
                 {
-                    names.Add(writersRawData.contractWriterNames[id]);
+                    names.Add(WritersRawData.contractWriterNames[id]);
                     ids.Add(id);
                 }
             }
@@ -214,36 +115,93 @@ namespace JectEditor.Inspectors.Contexts
             if (names.Count == 1)
                 return;
             
-            int selected = DrawPopup(0, names.ToArray(), new GUIStyle(TextStyle) {fontStyle = FontStyle.Italic});
+            int selected = DrawPopup(0, names.ToArray(), TextStyles.TextStyle.FontStyledClone(FontStyle.Italic));
             if (selected > 0)
             {
-                Array.Resize(ref Context.usedContractWriterIds, Context.usedContractWriterIds.Length + 1);
-                int upperBound = Context.usedContractWriterIds.GetUpperBound(0);
-                Context.usedContractWriterIds[upperBound] = ids[selected - 1];
+                AddToArray(ref Context.usedContractWriterIds, ids[selected - 1]);
             }
         }
         
         protected void DrawFooter()
         {
             BeginLine();
-            DrawLabel("}", TextStyle);
+            DrawLabel("}", TextStyles.TextStyle);
         }
-        
+
         protected void BeginLine()
         {
-            Rect = GUILayoutUtility.GetRect(GUIContent.none, EditorStyles.label);
-            EditorGUI.DrawRect(Rect.AddH(2), PreferencesManager.Preferences.bgColor);
-            LastRect = new Rect(Rect.x + 4, Rect.y, 15, Rect.height);
+            if (Event.current.type != EventType.Layout)
+            {
+                Rect = GUILayoutUtility.GetRect(GUIContent.none, EditorStyles.label);
+                LastRect = new Rect(Rect.x + 4, Rect.y, 17, Rect.height);
+                _lastNonLayoutRects.Insert(_lineCount, Rect);
+            }
+            else
+            {
+                Rect = GUILayoutUtility.GetRect(GUIContent.none, EditorStyles.label);
+                LastRect = new Rect(Rect.x + 4, Rect.y, 17, Rect.height);
+                if (_lineCount < _lastNonLayoutRects.Count)
+                {
+                    Rect = _lastNonLayoutRects[_lineCount];
+                }
+            }
             
-            EditorGUI.LabelField(LastRect, (++_lineCount).ToString(), LineEnumStyle);
+            EditorGUI.DrawRect(Rect.AddH(2), PreferencesManager.Preferences.bgColor);
+            
+            EditorGUI.LabelField(LastRect, (++_lineCount).ToString(), TextStyles.LineEnumStyle);
             LastRect.x += Indent * 10 + 5;
         }
 
+        protected void DrawParameterDependencyId(string methodName, string parameterName)
+        {
+            if (InjectionInfo.methodDependencyIds.ContainsKey(methodName))
+            {
+                DrawMemberDependencyId(InjectionInfo.methodDependencyIds[methodName], parameterName);
+
+                if (InjectionInfo.methodDependencyIds[methodName].Count == 0)
+                {
+                    InjectionInfo.methodDependencyIds.Remove(methodName);
+                }
+                return;
+            }
+            
+            var parameterDependencyIds = new SerializableDictionary<string, Identifier>();
+            DrawMemberDependencyId(parameterDependencyIds, parameterName);
+            if (parameterDependencyIds.Count > 0)
+            {
+                InjectionInfo.methodDependencyIds[methodName] = parameterDependencyIds;
+            }
+        }
+        
+        protected void DrawMemberDependencyId(Dictionary<string, Identifier> dependencies, string memberName)
+        {
+            DrawLabel("=", TextStyles.TextStyle);
+            if (dependencies.ContainsKey(memberName))
+            {
+                string text = DrawText(dependencies[memberName].ToString(), TextStyles.ValueStyle);
+                if (text.Replace(" ", "") == "")
+                {
+                    dependencies.Remove(memberName);
+                    return;
+                }
+                dependencies[memberName] = new Identifier(text);
+                return;
+            }
+            {
+                const string baseMessage = "None";
+                string text = DrawText(baseMessage, TextStyles.ValueStyle);
+                if (baseMessage != text)
+                {
+                    dependencies[memberName] = new Identifier(text);
+                }
+            }
+        }
+        
         protected virtual void DrawType(Type type, float space = 4)
         {
             if (PreferencesManager.Preferences.simpleTypes)
             {
-                DrawLabel("var", ModStyle, space);
+                DrawLabel("var", TextStyles.ModStyle, space);
                 return;
             }
             DrawFullType(type, space);
@@ -252,13 +210,13 @@ namespace JectEditor.Inspectors.Contexts
         private void DrawFullType(Type type, float space = 4)
         {
             string typeName = SpecialTypeNames.ContainsKey(type.Name) ? SpecialTypeNames[type.Name] : type.Name;
-            GUIStyle style = char.IsLower(typeName[0]) ? ModStyle : TypeStyle;
+            GUIStyle style = char.IsLower(typeName[0]) ? TextStyles.ModStyle : TextStyles.TypeStyle;
 
             if (type.GenericTypeArguments.Length > 0)
             {
                 typeName = typeName.Split('`')[0];
                 DrawLabel(typeName, style, space);
-                DrawLabel("<", TextStyle, -1);
+                DrawLabel("<", TextStyles.TextStyle, -1);
                 
                 foreach (Type genericType in type.GenericTypeArguments)
                 {
@@ -266,10 +224,10 @@ namespace JectEditor.Inspectors.Contexts
                     
                     if (type.GenericTypeArguments[type.GenericTypeArguments.GetUpperBound(0)] != genericType)
                     {
-                        DrawLabel(", ", TextStyle, -1);
+                        DrawLabel(", ", TextStyles.TextStyle, -1);
                     }
                 }
-                DrawLabel(">", TextStyle, -1);
+                DrawLabel(">", TextStyles.TextStyle, -1);
             }
             else
             {
@@ -307,5 +265,14 @@ namespace JectEditor.Inspectors.Contexts
             LastRect = LastRect.WithXW(LastRect.xMax + space, size);
             return EditorGUI.Popup(LastRect, selected, options, style);
         }
+        
+        protected void AddToArray<T>(ref T[] array, T value)
+        {
+            Array.Resize(ref array, array.Length + 1);
+            array[array.GetUpperBound(0)] = value;
+        }
+
+        protected T[] RemoveFromArray<T>(T[] array, T value) 
+            => array.Where(arrayValue => !arrayValue.Equals(value)).ToArray();
     }
 }

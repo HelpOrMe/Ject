@@ -8,9 +8,9 @@ using UnityEngine;
 
 namespace Ject.Usage
 {
-    #if UNITY_EDITOR
+#if UNITY_EDITOR
     [InitializeOnLoad]
-    #endif
+#endif
     public static class ContractWriters
     {
         public static ContractWritersRawData RawData => Data.rawData;
